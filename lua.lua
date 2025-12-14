@@ -143,10 +143,6 @@ Tab:CreateToggle({
                             beam.Size = Vector3.new(0.2, 0.2, 50)
                             beam.BrickColor = BrickColor.new("Bright red")
                             beam.Material = Enum.Material.Neon
-                            beam.CFrame = CFrame.new(
-                                rightHand.Position + rightHand.CFrame.LookVector * 25,
-                                rightHand.Position + rightHand.CFrame.LookVector * 50
-                            )
                             beam.Parent = workspace
                             beams[plr] = beam
                         end
@@ -161,10 +157,10 @@ Tab:CreateToggle({
                     if char then
                         local rightHand = char:FindFirstChild("RightHand") or char:FindFirstChild("Right Arm")
                         if rightHand then
-                            beam.CFrame = CFrame.new(
-                                rightHand.Position + rightHand.CFrame.LookVector * 25,
-                                rightHand.Position + rightHand.CFrame.LookVector * 50
-                            )
+                            local lookVec = rightHand.CFrame.LookVector
+                            local center = rightHand.Position + lookVec * 25
+                            beam.CFrame = CFrame.new(center, rightHand.Position + lookVec * 50)
+                            beam.CFrame = beam.CFrame * CFrame.Angles(math.rad(90),0,0)
                         end
                     end
                 end
