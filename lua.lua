@@ -85,22 +85,43 @@ Tab:CreateButton({
     end,
 })
 
-Tab:CreateButton({
+-- =================== Hitboxes Section ===================
+Tab:CreateSection("Hitboxes")
+
+local showHitboxes = false
+local hitboxConnection
+
+Tab:CreateToggle({
     Name = "Show All Hitboxes",
-    Callback = function()
-        for _, plr in ipairs(Players:GetPlayers()) do
-            local char = plr.Character
-            if char then
-                for _, part in ipairs(char:GetChildren()) do
-                    if part:IsA("BasePart") then
-                        part.Transparency = 0
+    CurrentValue = false,
+    Flag = "ShowHitboxesToggle",
+    Callback = function(Value)
+        showHitboxes = Value
+
+        if Value then
+            hitboxConnection = RunService.RenderStepped:Connect(function()
+                for _, plr in ipairs(Players:GetPlayers()) do
+                    local char = plr.Character
+                    if char then
+                        for _, part in ipairs(char:GetChildren()) do
+                            if part:IsA("BasePart") then
+                                part.Transparency = 0
+                                part.LocalTransparencyModifier = 0
+                            end
+                        end
+
+                        local hb = char:FindFirstChild("hitbox")
+                        if hb and hb:IsA("BasePart") then
+                            hb.Transparency = 0.5
+                            hb.CanCollide = false
+                        end
                     end
                 end
-                local hb = char:FindFirstChild("hitbox")
-                if hb and hb:IsA("BasePart") then
-                    hb.Transparency = 0.75
-                    hb.CanCollide = false
-                end
+            end)
+        else
+            if hitboxConnection then
+                hitboxConnection:Disconnect()
+                hitboxConnection = nil
             end
         end
     end,
@@ -276,7 +297,7 @@ Tab:CreateToggle({
             antiFallPart = Instance.new("Part")
             antiFallPart.Size = Vector3.new(150,1,150)
             antiFallPart.Anchored = true
-            antiFallPart.CanCollide = true
+            antiFallPart.CanCollide = false
             antiFallPart.Transparency = 0
             antiFallPart.Position = chao.Position + Vector3.new(0, antiFallHeight, 0)
             antiFallPart.Parent = workspace
