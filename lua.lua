@@ -155,11 +155,17 @@ Tab:CreateToggle({
                 for plr, beam in pairs(beams) do
                     local char = plr.Character
                     if char then
-                        local rightHand = char:FindFirstChild("RightHand") or char:FindFirstChild("Right Arm")
-                        if rightHand then
-                            local lookVec = rightHand.CFrame.LookVector
-                            local center = rightHand.Position + lookVec * 25
-                            beam.CFrame = CFrame.new(center, rightHand.Position + lookVec * 50)
+                        local rightArm = char:FindFirstChild("RightHand") or char:FindFirstChild("Right Arm")
+                        local torso = char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso")
+                        if rightArm and torso then
+                            -- point arm forward
+                            local lookVec = torso.CFrame.LookVector
+                            local targetCFrame = CFrame.new(rightArm.Position, rightArm.Position + lookVec)
+                            rightArm.CFrame = targetCFrame
+
+                            -- update beam
+                            local center = rightArm.Position + lookVec * 25
+                            beam.CFrame = CFrame.new(center, rightArm.Position + lookVec * 50)
                             beam.CFrame = beam.CFrame * CFrame.Angles(math.rad(90),0,0)
                         end
                     end
