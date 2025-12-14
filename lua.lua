@@ -221,7 +221,7 @@ Tab:CreateSection("Anti-Fall")
 -- Anti-Fall Height Slider
 Tab:CreateSlider({
     Name = "Anti-Fall Height",
-    Range = {0,2500},
+    Range = {1000,2500},
     Increment = 1,
     Suffix = "Studs",
     CurrentValue = antiFallHeight,
@@ -267,7 +267,36 @@ Tab:CreateToggle({
     end,
 })
 
+-- =================== Lock-On Section ===================
+Tab:CreateSection("Lock-On")
+
 local lockOn = false
+local lockRange = 7
+local rangeCylinder = Instance.new("CylinderHandleAdornment")
+rangeCylinder.Name = "LockOnRange"
+rangeCylinder.Adornee = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+rangeCylinder.Parent = workspace
+rangeCylinder.Height = 0.1
+rangeCylinder.Radius = lockRange
+rangeCylinder.Transparency = 0.5
+rangeCylinder.Color3 = Color3.fromRGB(0, 0, 255)
+rangeCylinder.AlwaysOnTop = false
+rangeCylinder.CFrame = CFrame.new(player.Character.HumanoidRootPart.Position)
+
+Tab:CreateSlider({
+    Name = "Lock-On Range",
+    Range = {1,20},
+    Increment = 1,
+    Suffix = "Studs",
+    CurrentValue = lockRange,
+    Flag = "LockOnRangeSlider",
+    Callback = function(Value)
+        lockRange = Value
+        if rangeCylinder then
+            rangeCylinder.Radius = lockRange
+        end
+    end,
+})
 
 Tab:CreateToggle({
     Name = "Lock-On Target",
@@ -275,24 +304,36 @@ Tab:CreateToggle({
     Flag = "LockOnToggle",
     Callback = function(Value)
         lockOn = Value
+        if lockOn and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            rangeCylinder.Adornee = player.Character.HumanoidRootPart
+            rangeCylinder.CFrame = CFrame.new(player.Character.HumanoidRootPart.Position)
+        else
+            rangeCylinder.Adornee = nil
+        end
     end,
 })
 
+-- Update rotation and cylinder position every frame
 RunService.RenderStepped:Connect(function()
-    if lockOn then
-        local character = player.Character
-        if character and character:FindFirstChild("HumanoidRootPart") then
-            local hrp = character.HumanoidRootPart
-            local candidates = {}
+    local char = player.Character
+    if char and char:FindFirstChild("HumanoidRootPart") then
+        local hrp = char.HumanoidRootPart
 
+        -- update cylinder position
+        if rangeCylinder and lockOn then
+            rangeCylinder.CFrame = CFrame.new(hrp.Position)
+        end
+
+        if lockOn then
+            local candidates = {}
             for _, plr in ipairs(Players:GetPlayers()) do
                 if plr ~= player then
-                    local char = plr.Character
-                    if char and char:FindFirstChild("HumanoidRootPart") then
-                        local targetPos = char.HumanoidRootPart.Position
+                    local targetChar = plr.Character
+                    if targetChar and targetChar:FindFirstChild("HumanoidRootPart") then
+                        local targetPos = targetChar.HumanoidRootPart.Position
                         local dist = (targetPos - hrp.Position).Magnitude
-                        if dist <= 7 then
-                            table.insert(candidates, char.HumanoidRootPart)
+                        if dist <= lockRange then
+                            table.insert(candidates, targetChar.HumanoidRootPart)
                         end
                     end
                 end
@@ -300,9 +341,8 @@ RunService.RenderStepped:Connect(function()
 
             if #candidates > 0 then
                 local target = candidates[math.random(1, #candidates)]
-                local targetPos = target.Position + Vector3.new(0,7,0)
-                local lookAt = Vector3.new(targetPos.X, hrp.Position.Y, targetPos.Z)
-                hrp.CFrame = CFrame.new(hrp.Position, lookAt)
+                local targetPos = target.Position + Vector3.new(0,7,0) -- offset 7 studs above
+                hrp.CFrame = CFrame.new(hrp.Position, Vector3.new(targetPos.X, hrp.Position.Y, targetPos.Z))
             end
         end
     end
