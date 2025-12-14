@@ -380,3 +380,56 @@ RunService.RenderStepped:Connect(function()
         end
     end
 end)
+
+-- =================== Super Punch Section ===================
+Tab:CreateSection("Combat")
+
+local superPunchEnabled = false
+local superPunchConnection
+
+Tab:CreateToggle({
+    Name = "Super Punch",
+    CurrentValue = false,
+    Flag = "SuperPunchToggle",
+    Callback = function(Value)
+        superPunchEnabled = Value
+
+        if Value then
+            superPunchConnection = RunService.RenderStepped:Connect(function()
+                local char = player.Character
+                if not char then return end
+
+                local rightArm =
+                    char:FindFirstChild("Right Arm") or
+                    char:FindFirstChild("RightHand") or
+                    char:FindFirstChild("RightUpperArm")
+
+                if not rightArm then return end
+
+                -- 🔁 USE LOCAL PLAYER NAME HERE
+                local fistsFolder = workspace:FindFirstChild(player.Name)
+                if not fistsFolder then return end
+
+                local fists = fistsFolder:FindFirstChild("Fists", true)
+                if not fists then return end
+
+                local fistRemote = fists:FindFirstChild("fistremote", true)
+                if not fistRemote then return end
+
+                local args = {
+                    [1] = "part",
+                    [2] = rightArm,
+                    [3] = Vector3.new(250, 250, 250),
+                    [4] = Vector3.new(250, 250, 250)
+                }
+
+                fistRemote:FireServer(unpack(args))
+            end)
+        else
+            if superPunchConnection then
+                superPunchConnection:Disconnect()
+                superPunchConnection = nil
+            end
+        end
+    end,
+})
