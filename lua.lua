@@ -7,12 +7,10 @@ local Window = Rayfield:CreateWindow({
    ShowText = "Menu",
    Theme = "Ocean",
    ToggleUIKeybind = "K",
-
    ConfigurationSaving = {
       Enabled = true,
       FileName = "Big Hub"
    },
-
    KeySystem = true,
    KeySettings = {
       Title = "Blindshot Menu Key",
@@ -26,7 +24,6 @@ local Window = Rayfield:CreateWindow({
 
 local Tab = Window:CreateTab("Main", 4483362458)
 
--- ===== SKINS =====
 Tab:CreateSection("Skins")
 
 Tab:CreateButton({
@@ -49,10 +46,8 @@ Tab:CreateButton({
    end,
 })
 
--- ===== GAME =====
 Tab:CreateSection("Game")
 
--- Show all hitboxes button
 Tab:CreateButton({
    Name = "Show All Hitboxes",
    Callback = function()
@@ -64,7 +59,6 @@ Tab:CreateButton({
                   part.Transparency = 0
                end
             end
-
             local hb = character:FindFirstChild("hitbox")
             if hb and hb:IsA("BasePart") then
                hb.Transparency = 0.75
@@ -75,7 +69,6 @@ Tab:CreateButton({
    end,
 })
 
--- Sit button
 Tab:CreateButton({
    Name = "Sit",
    Callback = function()
@@ -90,7 +83,6 @@ Tab:CreateButton({
    end,
 })
 
--- Jump button
 Tab:CreateButton({
    Name = "Jump",
    Callback = function()
@@ -105,10 +97,11 @@ Tab:CreateButton({
    end,
 })
 
--- TP Up + Freeze toggle
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
-local frozenRoot -- store HRP
+local frozenRoot
+local beams = {}
 
 Tab:CreateToggle({
    Name = "Float",
@@ -117,29 +110,20 @@ Tab:CreateToggle({
    Callback = function(Value)
       local character = player.Character
       if not character then return end
-
       local hrp = character:FindFirstChild("HumanoidRootPart")
       if not hrp then return end
-
       if Value then
-         -- toggle ON: TP up 2 studs and freeze
          frozenRoot = hrp
          hrp.CFrame = hrp.CFrame + Vector3.new(0, 2, 0)
          hrp.Anchored = true
       else
-         -- toggle OFF: unfreeze
          if frozenRoot then
             frozenRoot.Anchored = false
             frozenRoot = nil
          end
       end
    end,
-   )}
-
-local RunService = game:GetService("RunService")
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local beams = {} -- store beam parts
+})
 
 Tab:CreateToggle({
     Name = "Show Lasers",
@@ -147,8 +131,6 @@ Tab:CreateToggle({
     Flag = "RedBeamESP",
     Callback = function(Value)
         if Value then
-            -- toggle ON
-            -- create beams
             for _, plr in ipairs(Players:GetPlayers()) do
                 if plr ~= player then
                     local char = plr.Character
@@ -158,23 +140,21 @@ Tab:CreateToggle({
                             local beam = Instance.new("Part")
                             beam.Anchored = true
                             beam.CanCollide = false
-                            beam.Size = Vector3.new(0.2, 0.2, 50) -- thin long beam
+                            beam.Size = Vector3.new(0.2, 0.2, 50)
                             beam.BrickColor = BrickColor.new("Bright red")
                             beam.Material = Enum.Material.Neon
-                            beam.CFrame = rightHand.CFrame * CFrame.new(0, 0, -25) -- extend forward
+                            beam.CFrame = rightHand.CFrame * CFrame.new(0, 0, -25)
                             beam.Parent = workspace
                             beams[plr] = beam
                         end
                     end
                 end
             end
-
-            -- update beam positions every frame
             local connection
             connection = RunService.RenderStepped:Connect(function()
                 for plr, beam in pairs(beams) do
                     local char = plr.Character
-                    if char and char:FindFirstChild("RightHand") then
+                    if char then
                         local rightHand = char:FindFirstChild("RightHand") or char:FindFirstChild("Right Arm")
                         if rightHand then
                             beam.CFrame = rightHand.CFrame * CFrame.new(0, 0, -25)
@@ -182,12 +162,8 @@ Tab:CreateToggle({
                     end
                 end
             end)
-            
-            -- store connection so we can disconnect when toggled off
             beams["_connection"] = connection
-
         else
-            -- toggle OFF: remove beams and disconnect
             if beams["_connection"] then
                 beams["_connection"]:Disconnect()
                 beams["_connection"] = nil
@@ -200,4 +176,4 @@ Tab:CreateToggle({
             beams = {}
         end
     end,
-}))
+})
