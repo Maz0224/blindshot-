@@ -135,7 +135,7 @@ Tab:CreateToggle({
         if not hrp then return end
         if Value then
             frozenRoot = hrp
-            hrp.CFrame = hrp.CFrame + Vector3.new(0,2,0)
+            hrp.CFrame = hrp.CFrame + Vector3.new(0,10,0)
             hrp.Anchored = true
         else
             if frozenRoot then
