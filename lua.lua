@@ -137,7 +137,7 @@ Tab:CreateToggle({
 
 -- Forward Lasers Toggle
 Tab:CreateToggle({
-    Name = "Forward Lasers",
+    Name = "Lasers (Turn off before shooting)",
     CurrentValue = false,
     Flag = "ForwardLaser",
     Callback = function(Value)
@@ -245,7 +245,7 @@ Tab:CreateToggle({
             if not chao then return end
 
             antiFallPart = Instance.new("Part")
-            antiFallPart.Size = Vector3.new(50,1,50)
+            antiFallPart.Size = Vector3.new(150,1,150)
             antiFallPart.Anchored = true
             antiFallPart.CanCollide = true
             antiFallPart.Transparency = 0
