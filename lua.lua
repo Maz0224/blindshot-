@@ -221,7 +221,7 @@ Tab:CreateSection("Anti-Fall")
 -- Anti-Fall Height Slider
 Tab:CreateSlider({
     Name = "Anti-Fall Height",
-    Range = {0,250},
+    Range = {0,2500},
     Increment = 1,
     Suffix = "Studs",
     CurrentValue = antiFallHeight,
