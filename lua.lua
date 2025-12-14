@@ -137,8 +137,9 @@ Tab:CreateToggle({
                 if plr ~= player then
                     local char = plr.Character
                     if char then
+                        local torso = char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso")
                         local rightHand = char:FindFirstChild("RightHand") or char:FindFirstChild("Right Arm")
-                        if rightHand then
+                        if torso and rightHand then
                             local beam = Instance.new("Part")
                             beam.Anchored = true
                             beam.CanCollide = false
@@ -146,7 +147,7 @@ Tab:CreateToggle({
                             beam.BrickColor = BrickColor.new("Bright red")
                             beam.Material = Enum.Material.Neon
                             beam.Parent = workspace
-                            beams[plr] = {beam = beam, hand = rightHand}
+                            beams[plr] = {beam = beam, torso = torso, hand = rightHand}
                         end
                     end
                 end
@@ -156,11 +157,13 @@ Tab:CreateToggle({
             connection = RunService.RenderStepped:Connect(function()
                 for plr, data in pairs(beams) do
                     local beam = data.beam
+                    local torso = data.torso
                     local hand = data.hand
-                    if beam and hand then
-                        local lookVec = hand.CFrame.LookVector
-                        local startPos = hand.Position
-                        local endPos = startPos + lookVec * 50
+                    if beam and torso and hand then
+                        local offset = (hand.Position - torso.Position) -- vector from torso to hand
+                        local startPos = torso.Position + offset
+                        local lookVec = hand.Position - torso.Position
+                        local endPos = startPos + lookVec.Unit * 50
                         local dir = (endPos - startPos).Unit
                         local dist = (endPos - startPos).Magnitude
                         beam.Size = Vector3.new(0.2, 0.2, dist)
