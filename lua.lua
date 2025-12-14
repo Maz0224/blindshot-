@@ -5,10 +5,10 @@ local function tp(cframe)
 end
 
 local Window = Rayfield:CreateWindow({
-    Name = "BlindShot Roblox Menu",
+    Name = "Blind Shor Roblox Menu",
     LoadingTitle = "Blindshot OP Menu",
-    LoadingSubtitle = "by maz",
-    ShowText = "Menu",
+    LoadingSubtitle = "By: Maz",
+    ShowText = "Maz's Menu",
     Theme = "Ocean",
     ToggleUIKeybind = "K",
     ConfigurationSaving = {
