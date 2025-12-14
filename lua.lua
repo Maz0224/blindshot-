@@ -278,7 +278,6 @@ Tab:CreateToggle({
     end,
 })
 
--- Update rotation every frame
 RunService.RenderStepped:Connect(function()
     if lockOn then
         local character = player.Character
@@ -301,9 +300,6 @@ RunService.RenderStepped:Connect(function()
 
             if #candidates > 0 then
                 local target = candidates[math.random(1, #candidates)]
-                local lookAt = CFrame.new(hrp.Position, target.Position + Vector3.new(0, 7, 0))
-                hrp.CFrame = CFrame.new(hrp.Position) * CFrame.Angles(0, lookAt.LookVector:Angle(), 0)
-                -- Simpler version: directly set HRP look vector
                 hrp.CFrame = CFrame.new(hrp.Position, target.Position + Vector3.new(0, 7, 0))
             end
         end
