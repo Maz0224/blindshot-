@@ -266,3 +266,46 @@ Tab:CreateToggle({
         end
     end,
 })
+
+local lockOn = false
+
+Tab:CreateToggle({
+    Name = "Lock-On Target",
+    CurrentValue = false,
+    Flag = "LockOnToggle",
+    Callback = function(Value)
+        lockOn = Value
+    end,
+})
+
+-- Update rotation every frame
+RunService.RenderStepped:Connect(function()
+    if lockOn then
+        local character = player.Character
+        if character and character:FindFirstChild("HumanoidRootPart") then
+            local hrp = character.HumanoidRootPart
+            local candidates = {}
+
+            for _, plr in ipairs(Players:GetPlayers()) do
+                if plr ~= player then
+                    local char = plr.Character
+                    if char and char:FindFirstChild("HumanoidRootPart") then
+                        local targetPos = char.HumanoidRootPart.Position
+                        local dist = (targetPos - hrp.Position).Magnitude
+                        if dist <= 7 then
+                            table.insert(candidates, char.HumanoidRootPart)
+                        end
+                    end
+                end
+            end
+
+            if #candidates > 0 then
+                local target = candidates[math.random(1, #candidates)]
+                local lookAt = CFrame.new(hrp.Position, target.Position + Vector3.new(0, 7, 0))
+                hrp.CFrame = CFrame.new(hrp.Position) * CFrame.Angles(0, lookAt.LookVector:Angle(), 0)
+                -- Simpler version: directly set HRP look vector
+                hrp.CFrame = CFrame.new(hrp.Position, target.Position + Vector3.new(0, 7, 0))
+            end
+        end
+    end
+end)
