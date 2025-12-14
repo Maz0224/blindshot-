@@ -255,7 +255,7 @@ Tab:CreateToggle({
             antiFallPart.Touched:Connect(function(hit)
                 local plr = Players:GetPlayerFromCharacter(hit.Parent)
                 if plr == player then
-                    tp(chao.Position)
+                    tp(antiFallPart.Position + Vector3.new(0, 20, 0)) -- teleport 20 studs above antiFallPart
                 end
             end)
         else
