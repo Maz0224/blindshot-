@@ -394,8 +394,8 @@ Tab:CreateToggle({
                 local args = {
                     [1] = "part",
                     [2] = rightArm,
-                    [3] = Vector3.new(250,250,250),
-                    [4] = Vector3.new(0,0,0)
+                    [3] = Vector3.new(0,0,0),
+                    [4] = Vector3.new(250,250,250)
                 }
                 fistRemote:FireServer(unpack(args))
             end)
