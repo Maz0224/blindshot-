@@ -143,13 +143,17 @@ Tab:CreateToggle({
                             beam.Size = Vector3.new(0.2, 0.2, 50)
                             beam.BrickColor = BrickColor.new("Bright red")
                             beam.Material = Enum.Material.Neon
-                            beam.CFrame = rightHand.CFrame * CFrame.new(0, 0, -25)
+                            beam.CFrame = CFrame.new(
+                                rightHand.Position + rightHand.CFrame.LookVector * 25,
+                                rightHand.Position + rightHand.CFrame.LookVector * 50
+                            )
                             beam.Parent = workspace
                             beams[plr] = beam
                         end
                     end
                 end
             end
+
             local connection
             connection = RunService.RenderStepped:Connect(function()
                 for plr, beam in pairs(beams) do
@@ -157,7 +161,10 @@ Tab:CreateToggle({
                     if char then
                         local rightHand = char:FindFirstChild("RightHand") or char:FindFirstChild("Right Arm")
                         if rightHand then
-                            beam.CFrame = rightHand.CFrame * CFrame.new(0, 0, -25)
+                            beam.CFrame = CFrame.new(
+                                rightHand.Position + rightHand.CFrame.LookVector * 25,
+                                rightHand.Position + rightHand.CFrame.LookVector * 50
+                            )
                         end
                     end
                 end
