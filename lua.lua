@@ -74,13 +74,25 @@ local Toggle = Tab:CreateToggle({
 local Section = Tab:CreateSection("Game")
 
 local Button = Tab:CreateButton({
-   Name = "Show All Hitboxs",
+   Name = "Show All Hitboxes",
    Callback = function()
-      for _, v in ipairs(game.Players:GetChildren())
-      if v:IsA("Part") or v:IsA("Part")
-        v.Transparency = 0
-      local hb = v.Character:FindFirstChild("hitbox")
-      hb.Transparency = 0.75
-    end
+      for _, player in ipairs(game.Players:GetPlayers()) do
+         local character = player.Character
+         if character then
+            -- Make all body parts visible
+            for _, part in ipairs(character:GetChildren()) do
+               if part:IsA("BasePart") then
+                  part.Transparency = 0
+               end
+            end
+
+            -- Show hitbox if it exists
+            local hb = character:FindFirstChild("hitbox")
+            if hb and hb:IsA("BasePart") then
+               hb.Transparency = 0.75
+               hb.CanCollide = false
+            end
+         end
+      end
    end,
 })
