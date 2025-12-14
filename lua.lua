@@ -159,3 +159,18 @@ local Button = Tab:CreateButton({
       end
    end,
 })
+
+
+local Button = Tab:CreateButton({
+   Name = "Sit",
+   Callback = function()
+         game.Players.LocalPlayer.Character.Humanoid.Sit = true
+   end,
+})
+
+local Button = Tab:CreateButton({
+   Name = "Jump",
+   Callback = function()
+         game.Players.LocalPlayer.Character.Huamnoid.Jump = true
+   end,
+})
