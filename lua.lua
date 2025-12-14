@@ -300,7 +300,9 @@ RunService.RenderStepped:Connect(function()
 
             if #candidates > 0 then
                 local target = candidates[math.random(1, #candidates)]
-                hrp.CFrame = CFrame.new(hrp.Position, target.Position + Vector3.new(0, 7, 0))
+                local targetPos = target.Position + Vector3.new(0,7,0)
+                local lookAt = Vector3.new(targetPos.X, hrp.Position.Y, targetPos.Z)
+                hrp.CFrame = CFrame.new(hrp.Position, lookAt)
             end
         end
     end
