@@ -12,8 +12,8 @@ local Window = Rayfield:CreateWindow({
     Theme = "Ocean",
     ToggleUIKeybind = "K",
     ConfigurationSaving = {
-        Enabled = true,
-        FileName = "Big Hub"
+        Enabled = false,
+        FileName = "n"
     },
     KeySystem = true,
     KeySettings = {
