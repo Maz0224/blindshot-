@@ -1,20 +1,20 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local function tp(cframe)
-    game.Players.LocalPlayer.Character.HumanoidRootPart.Position = cframe
+    local hrp = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if hrp then
+        hrp.Position = cframe
+    end
 end
 
 local Window = Rayfield:CreateWindow({
-    Name = "Blind Shor Roblox Menu",
+    Name = "BlindShot Roblox Menu",
     LoadingTitle = "Blindshot OP Menu",
-    LoadingSubtitle = "By: Maz",
-    ShowText = "Maz's Menu",
+    LoadingSubtitle = "by maz",
+    ShowText = "Menu",
     Theme = "Ocean",
     ToggleUIKeybind = "K",
-    ConfigurationSaving = {
-        Enabled = false,
-        FileName = "n"
-    },
+    ConfigurationSaving = { Enabled = false, FileName = "n" },
     KeySystem = true,
     KeySettings = {
         Title = "Blindshot Menu Key",
@@ -44,16 +44,13 @@ Tab:CreateButton({
     Callback = function()
         local remote = game:GetService("ReplicatedStorage"):WaitForChild("WeaponShopRemote")
         for i = 1, 6 do
-            remote:FireServer(
-                "PurchaseSkin",
-                {
-                    image = "rbxassetid://123456789",
-                    name = "Nil",
-                    price = 0,
-                    id = i,
-                    currency = "Cash"
-                }
-            )
+            remote:FireServer("PurchaseSkin", {
+                image = "rbxassetid://123456789",
+                name = "Nil",
+                price = 0,
+                id = i,
+                currency = "Cash"
+            })
             task.wait(0.1)
         end
     end,
@@ -65,9 +62,9 @@ Tab:CreateSection("Player Actions")
 Tab:CreateButton({
     Name = "Sit",
     Callback = function()
-        local character = player.Character
-        if character then
-            local humanoid = character:FindFirstChildOfClass("Humanoid")
+        local char = player.Character
+        if char then
+            local humanoid = char:FindFirstChildOfClass("Humanoid")
             if humanoid then
                 humanoid.Sit = true
             end
@@ -78,9 +75,9 @@ Tab:CreateButton({
 Tab:CreateButton({
     Name = "Jump",
     Callback = function()
-        local character = player.Character
-        if character then
-            local humanoid = character:FindFirstChildOfClass("Humanoid")
+        local char = player.Character
+        if char then
+            local humanoid = char:FindFirstChildOfClass("Humanoid")
             if humanoid then
                 humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
             end
@@ -124,7 +121,7 @@ Tab:CreateToggle({
         if not hrp then return end
         if Value then
             frozenRoot = hrp
-            hrp.CFrame = hrp.CFrame + Vector3.new(0,10,0)
+            hrp.CFrame = hrp.CFrame + Vector3.new(0,2,0)
             hrp.Anchored = true
         else
             if frozenRoot then
@@ -215,10 +212,43 @@ Tab:CreateToggle({
     end,
 })
 
+-- Laser Refresh Button
+Tab:CreateButton({
+    Name = "Refresh Lasers",
+    Callback = function()
+        -- Destroy all existing lasers
+        for plr, data in pairs(lasers) do
+            if data.beam then
+                data.beam:Destroy()
+            end
+        end
+        lasers = {}
+
+        -- Recreate lasers for all current players
+        for _, plr in ipairs(Players:GetPlayers()) do
+            if plr ~= player then
+                local char = plr.Character
+                if char then
+                    local torso = char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso")
+                    if torso then
+                        local beam = Instance.new("Part")
+                        beam.Anchored = true
+                        beam.CanCollide = false
+                        beam.Size = Vector3.new(0.2,0.2,50)
+                        beam.BrickColor = BrickColor.new("Bright blue")
+                        beam.Material = Enum.Material.Neon
+                        beam.Parent = workspace
+                        lasers[plr] = {beam=beam, torso=torso}
+                    end
+                end
+            end
+        end
+    end,
+})
+
 -- =================== Anti-Fall Section ===================
 Tab:CreateSection("Anti-Fall")
 
--- Anti-Fall Height Slider
 Tab:CreateSlider({
     Name = "Anti-Fall Height",
     Range = {750,2500},
@@ -234,7 +264,6 @@ Tab:CreateSlider({
     end,
 })
 
--- Anti-Fall Toggle
 Tab:CreateToggle({
     Name = "Anti-Fall",
     CurrentValue = false,
@@ -255,7 +284,7 @@ Tab:CreateToggle({
             antiFallPart.Touched:Connect(function(hit)
                 local plr = Players:GetPlayerFromCharacter(hit.Parent)
                 if plr == player then
-                    tp(antiFallPart.Position + Vector3.new(0, 20, 0)) -- teleport 20 studs above antiFallPart
+                    tp(antiFallPart.Position + Vector3.new(0, 20, 0))
                 end
             end)
         else
@@ -316,14 +345,14 @@ Tab:CreateToggle({
     end,
 })
 
--- Smooth lock-on update
+-- Smooth nearest target lock-on
 RunService.RenderStepped:Connect(function()
     local char = player.Character
     if char and char:FindFirstChild("HumanoidRootPart") then
         local hrp = char.HumanoidRootPart
 
         if rangeSphere then
-            rangeSphere.Position = hrp.Position -- keep sphere centered in player
+            rangeSphere.Position = hrp.Position
         end
 
         if lockOn then
