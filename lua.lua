@@ -125,6 +125,8 @@ Tab:CreateToggle({
    end,
 })
 
+local beams = {}
+
 Tab:CreateToggle({
     Name = "Show Lasers",
     CurrentValue = false,
@@ -137,23 +139,6 @@ Tab:CreateToggle({
                     if char then
                         local rightHand = char:FindFirstChild("RightHand") or char:FindFirstChild("Right Arm")
                         if rightHand then
-                            -- Give invisible tool if they don't have one
-                            local tool = char:FindFirstChild("LaserTool")
-                            if not tool then
-                                tool = Instance.new("Tool")
-                                tool.Name = "LaserTool"
-                                tool.RequiresHandle = true
-                                local handle = Instance.new("Part")
-                                handle.Name = "Handle"
-                                handle.Size = Vector3.new(0.1, 0.1, 0.1)
-                                handle.Transparency = 1
-                                handle.CanCollide = false
-                                handle.Parent = tool
-                                tool.Parent = plr.Backpack
-                                plr.Character.Humanoid:EquipTool(tool)
-                            end
-
-                            -- Create beam
                             local beam = Instance.new("Part")
                             beam.Anchored = true
                             beam.CanCollide = false
@@ -161,7 +146,7 @@ Tab:CreateToggle({
                             beam.BrickColor = BrickColor.new("Bright red")
                             beam.Material = Enum.Material.Neon
                             beam.Parent = workspace
-                            beams[plr] = {beam = beam, handle = tool.Handle}
+                            beams[plr] = {beam = beam, hand = rightHand}
                         end
                     end
                 end
@@ -171,15 +156,15 @@ Tab:CreateToggle({
             connection = RunService.RenderStepped:Connect(function()
                 for plr, data in pairs(beams) do
                     local beam = data.beam
-                    local handle = data.handle
-                    if beam and handle then
-                        local lookVec = handle.CFrame.LookVector
-                        local center = handle.Position + lookVec * 25
-                        local target = handle.Position + lookVec * 50
-                        local direction = (target - center).Unit
-                        local distance = (target - center).Magnitude
-                        beam.Size = Vector3.new(0.2, 0.2, distance)
-                        beam.CFrame = CFrame.new(center + direction * distance / 2, target)
+                    local hand = data.hand
+                    if beam and hand then
+                        local lookVec = hand.CFrame.LookVector
+                        local startPos = hand.Position
+                        local endPos = startPos + lookVec * 50
+                        local dir = (endPos - startPos).Unit
+                        local dist = (endPos - startPos).Magnitude
+                        beam.Size = Vector3.new(0.2, 0.2, dist)
+                        beam.CFrame = CFrame.new(startPos + dir*dist/2, endPos)
                     end
                 end
             end)
