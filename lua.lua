@@ -272,6 +272,8 @@ Tab:CreateSection("Lock-On")
 
 local lockOn = false
 local lockRange = 7
+
+-- Sphere visualization
 local rangeSphere = Instance.new("SphereHandleAdornment")
 rangeSphere.Name = "LockOnRange"
 rangeSphere.Adornee = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
@@ -282,6 +284,7 @@ rangeSphere.Color3 = Color3.fromRGB(0, 0, 255)
 rangeSphere.AlwaysOnTop = false
 rangeSphere.CFrame = CFrame.new(player.Character.HumanoidRootPart.Position)
 
+-- Range Slider
 Tab:CreateSlider({
     Name = "Lock-On Range",
     Range = {1,250},
@@ -297,6 +300,7 @@ Tab:CreateSlider({
     end,
 })
 
+-- Lock-On Toggle
 Tab:CreateToggle({
     Name = "Lock-On Target",
     CurrentValue = false,
@@ -305,43 +309,45 @@ Tab:CreateToggle({
         lockOn = Value
         if lockOn and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
             rangeSphere.Adornee = player.Character.HumanoidRootPart
-            rangeSphere.CFrame = CFrame.new(player.Character.HumanoidRootPart.Position)
         else
             rangeSphere.Adornee = nil
         end
     end,
 })
 
--- Update rotation and sphere position every frame
+-- Update rotation and sphere
 RunService.RenderStepped:Connect(function()
     local char = player.Character
     if char and char:FindFirstChild("HumanoidRootPart") then
         local hrp = char.HumanoidRootPart
 
-        -- update sphere position
+        -- Update sphere position
         if rangeSphere and lockOn then
             rangeSphere.CFrame = CFrame.new(hrp.Position)
         end
 
         if lockOn then
-            local candidates = {}
+            local nearest
+            local nearestDist = math.huge
+
             for _, plr in ipairs(Players:GetPlayers()) do
                 if plr ~= player then
                     local targetChar = plr.Character
                     if targetChar and targetChar:FindFirstChild("HumanoidRootPart") then
                         local targetPos = targetChar.HumanoidRootPart.Position
                         local dist = (targetPos - hrp.Position).Magnitude
-                        if dist <= lockRange then
-                            table.insert(candidates, targetChar.HumanoidRootPart)
+                        if dist <= lockRange and dist < nearestDist then
+                            nearest = targetChar.HumanoidRootPart
+                            nearestDist = dist
                         end
                     end
                 end
             end
 
-            if #candidates > 0 then
-                local target = candidates[math.random(1, #candidates)]
-                local targetPos = target.Position + Vector3.new(0,7,0) -- offset 7 studs above
-                hrp.CFrame = CFrame.new(hrp.Position, Vector3.new(targetPos.X, hrp.Position.Y, targetPos.Z))
+            if nearest then
+                local targetPos = nearest.Position + Vector3.new(0,7,0) -- offset 7 studs above
+                local desiredCFrame = CFrame.new(hrp.Position, Vector3.new(targetPos.X, hrp.Position.Y, targetPos.Z))
+                hrp.CFrame = hrp.CFrame:lerp(desiredCFrame, 0.15) -- smoother rotation
             end
         end
     end
