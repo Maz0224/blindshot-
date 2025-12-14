@@ -34,7 +34,7 @@ local player = Players.LocalPlayer
 local frozenRoot
 local lasers = {}
 local antiFallPart
-local antiFallHeight = 10
+local antiFallHeight = 1000
 
 -- =================== Skins Section ===================
 Tab:CreateSection("Skins")
@@ -270,74 +270,73 @@ Tab:CreateToggle({
 -- =================== Lock-On Section ===================
 Tab:CreateSection("Lock-On")
 
+local lockRange = 20
 local lockOn = false
-local lockRange = 7
+local rangeSphere
 
--- Sphere visualization
-local rangeSphere = Instance.new("SphereHandleAdornment")
-rangeSphere.Name = "LockOnRange"
-rangeSphere.Adornee = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-rangeSphere.Parent = workspace
-rangeSphere.Radius = lockRange
-rangeSphere.Transparency = 0.5
-rangeSphere.Color3 = Color3.fromRGB(0, 0, 255)
-rangeSphere.AlwaysOnTop = false
-rangeSphere.CFrame = CFrame.new(player.Character.HumanoidRootPart.Position)
-
--- Range Slider
 Tab:CreateSlider({
     Name = "Lock-On Range",
-    Range = {1,250},
+    Range = {1,100},
     Increment = 1,
     Suffix = "Studs",
     CurrentValue = lockRange,
-    Flag = "LockOnRangeSlider",
+    Flag = "LockOnRange",
     Callback = function(Value)
         lockRange = Value
         if rangeSphere then
-            rangeSphere.Radius = lockRange
+            rangeSphere.Size = Vector3.new(lockRange*2, lockRange*2, lockRange*2)
         end
     end,
 })
 
--- Lock-On Toggle
 Tab:CreateToggle({
     Name = "Lock-On Target",
     CurrentValue = false,
     Flag = "LockOnToggle",
     Callback = function(Value)
         lockOn = Value
-        if lockOn and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            rangeSphere.Adornee = player.Character.HumanoidRootPart
-        else
-            rangeSphere.Adornee = nil
+        local char = player.Character
+        if lockOn and char then
+            local hrp = char:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                rangeSphere = Instance.new("Part")
+                rangeSphere.Shape = Enum.PartType.Ball
+                rangeSphere.Anchored = true
+                rangeSphere.CanCollide = false
+                rangeSphere.Transparency = 0.5
+                rangeSphere.Color = Color3.fromRGB(0,0,255)
+                rangeSphere.Size = Vector3.new(lockRange*2, lockRange*2, lockRange*2)
+                rangeSphere.Position = hrp.Position
+                rangeSphere.Parent = workspace
+            end
+        elseif not lockOn and rangeSphere then
+            rangeSphere:Destroy()
+            rangeSphere = nil
         end
     end,
 })
 
--- Update rotation and sphere
+-- Smooth lock-on update
 RunService.RenderStepped:Connect(function()
     local char = player.Character
     if char and char:FindFirstChild("HumanoidRootPart") then
         local hrp = char.HumanoidRootPart
 
-        -- Update sphere position
-        if rangeSphere and lockOn then
-            rangeSphere.CFrame = CFrame.new(hrp.Position)
+        if rangeSphere then
+            rangeSphere.Position = hrp.Position -- keep sphere centered in player
         end
 
         if lockOn then
             local nearest
             local nearestDist = math.huge
-
             for _, plr in ipairs(Players:GetPlayers()) do
                 if plr ~= player then
-                    local targetChar = plr.Character
-                    if targetChar and targetChar:FindFirstChild("HumanoidRootPart") then
-                        local targetPos = targetChar.HumanoidRootPart.Position
+                    local tChar = plr.Character
+                    if tChar and tChar:FindFirstChild("HumanoidRootPart") then
+                        local targetPos = tChar.HumanoidRootPart.Position
                         local dist = (targetPos - hrp.Position).Magnitude
                         if dist <= lockRange and dist < nearestDist then
-                            nearest = targetChar.HumanoidRootPart
+                            nearest = tChar.HumanoidRootPart
                             nearestDist = dist
                         end
                     end
@@ -345,9 +344,9 @@ RunService.RenderStepped:Connect(function()
             end
 
             if nearest then
-                local targetPos = nearest.Position + Vector3.new(0,7,0) -- offset 7 studs above
+                local targetPos = nearest.Position + Vector3.new(0,7,0)
                 local desiredCFrame = CFrame.new(hrp.Position, Vector3.new(targetPos.X, hrp.Position.Y, targetPos.Z))
-                hrp.CFrame = hrp.CFrame:lerp(desiredCFrame, 0.15) -- smoother rotation
+                hrp.CFrame = hrp.CFrame:lerp(desiredCFrame, 0.15)
             end
         end
     end
