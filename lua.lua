@@ -272,28 +272,27 @@ Tab:CreateSection("Lock-On")
 
 local lockOn = false
 local lockRange = 7
-local rangeCylinder = Instance.new("CylinderHandleAdornment")
-rangeCylinder.Name = "LockOnRange"
-rangeCylinder.Adornee = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-rangeCylinder.Parent = workspace
-rangeCylinder.Height = 0.1
-rangeCylinder.Radius = lockRange
-rangeCylinder.Transparency = 0.5
-rangeCylinder.Color3 = Color3.fromRGB(0, 0, 255)
-rangeCylinder.AlwaysOnTop = false
-rangeCylinder.CFrame = CFrame.new(player.Character.HumanoidRootPart.Position)
+local rangeSphere = Instance.new("SphereHandleAdornment")
+rangeSphere.Name = "LockOnRange"
+rangeSphere.Adornee = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+rangeSphere.Parent = workspace
+rangeSphere.Radius = lockRange
+rangeSphere.Transparency = 0.5
+rangeSphere.Color3 = Color3.fromRGB(0, 0, 255)
+rangeSphere.AlwaysOnTop = false
+rangeSphere.CFrame = CFrame.new(player.Character.HumanoidRootPart.Position)
 
 Tab:CreateSlider({
     Name = "Lock-On Range",
-    Range = {1,20},
+    Range = {1,250},
     Increment = 1,
     Suffix = "Studs",
     CurrentValue = lockRange,
     Flag = "LockOnRangeSlider",
     Callback = function(Value)
         lockRange = Value
-        if rangeCylinder then
-            rangeCylinder.Radius = lockRange
+        if rangeSphere then
+            rangeSphere.Radius = lockRange
         end
     end,
 })
@@ -305,23 +304,23 @@ Tab:CreateToggle({
     Callback = function(Value)
         lockOn = Value
         if lockOn and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            rangeCylinder.Adornee = player.Character.HumanoidRootPart
-            rangeCylinder.CFrame = CFrame.new(player.Character.HumanoidRootPart.Position)
+            rangeSphere.Adornee = player.Character.HumanoidRootPart
+            rangeSphere.CFrame = CFrame.new(player.Character.HumanoidRootPart.Position)
         else
-            rangeCylinder.Adornee = nil
+            rangeSphere.Adornee = nil
         end
     end,
 })
 
--- Update rotation and cylinder position every frame
+-- Update rotation and sphere position every frame
 RunService.RenderStepped:Connect(function()
     local char = player.Character
     if char and char:FindFirstChild("HumanoidRootPart") then
         local hrp = char.HumanoidRootPart
 
-        -- update cylinder position
-        if rangeCylinder and lockOn then
-            rangeCylinder.CFrame = CFrame.new(hrp.Position)
+        -- update sphere position
+        if rangeSphere and lockOn then
+            rangeSphere.CFrame = CFrame.new(hrp.Position)
         end
 
         if lockOn then
